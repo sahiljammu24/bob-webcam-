@@ -12,7 +12,6 @@ import cv2
 import os
 import time
 
-
 # Set page config
 st.set_page_config(
     page_title="Lucky Draw Extravaganza",
@@ -20,7 +19,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
 # Admin credentials (in production, use environment variables or proper auth)
 ADMIN_PASSWORD = "admin123"  # Change this to your secure password
 
@@ -543,3 +541,4 @@ def main(on):
 
 if __name__ == "__main__":
     main(on=True)
+
