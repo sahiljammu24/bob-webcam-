@@ -492,51 +492,44 @@ def main(on):
             st.error("Not enough eligible participants for the requested number of winners!")
     else:
         st.warning("Please add participants before running a draw.")
-
-    show_webcam = st.checkbox("Show web", value=on)
-
+    show_webcam = st.checkbox("Show webcam feed", value=False)
+    
     if show_webcam:
-        # Create a session state to store captured images
-        if 'captured_images' not in st.session_state:
-            st.session_state.captured_images = []
-
-        # Option to show webcam feed
-
-        # Initialize webcam
+        FRAME_WINDOW = st.image([])
         cap = cv2.VideoCapture(0)
-
+    
         if not cap.isOpened():
-            st.error("Could not open webcam")
-            return
-        # Create placeholders for the webcam feed and captured image
-        webcam_placeholder = st.empty()
-        capture_placeholder = st.empty()
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Convert from BGR to RGB
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            filename = save_image(frame)
-            st.session_state.captured_images.append(filename)
-            time.sleep(0.25)
-
-        cap.release()
-
-        # Display saved images section
-        if st.session_state.captured_images:
-
-            cols = st.columns(3)  # Display 3 images per row
-
+            st.error("Could not open webcam. Please check if it's connected and try again.")
+        else:
+            while show_webcam:
+                ret, frame = cap.read()
+                if not ret:
+                    st.warning("Unable to read frame from webcam")
+                    break
+                
+                # Convert to RGB and display
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                FRAME_WINDOW.image(frame)
+                
+                # Add a button to capture image
+                if st.button("Capture Image"):
+                    filename = save_image(frame)
+                    st.session_state.captured_images.append(filename)
+                    st.success(f"Image saved as {filename}")
+                    
+            cap.release()
+        
+        # Display captured images
+        if 'captured_images' in st.session_state and st.session_state.captured_images:
+            st.subheader("Captured Images")
+            cols = st.columns(3)
+            
             for i, img_path in enumerate(st.session_state.captured_images):
                 try:
                     img = Image.open(img_path)
-                    cols[i % 3].image(img, caption=os.path.basename(img_path),
-                                      use_column_width=True)
+                    cols[i % 3].image(img, caption=os.path.basename(img_path))
                 except Exception as e:
-                    st.error(f"Error loading image {img_path}: {e}")
+                    st.error(f"Error loading {img_path}: {e}")
 
 
 if __name__ == "__main__":
